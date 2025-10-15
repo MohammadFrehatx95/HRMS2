@@ -12,7 +12,7 @@ namespace HRMS2.Controllers
     {
         public static List<Employee> employees = new List<Employee>()
         {
-          new Employee() { Id = 1,FirstName = "Mohammad",LastName = "Frehat",Email = "mohammadfrehat95@gmail.com",Position ="Leader", BirthDate = new DateTime(2003,11,27)},
+          new Employee() { Id = 1,FirstName = "Murad",LastName = "Frehat",Email = "mohammadfrehat95@gmail.com",Position ="Leader", BirthDate = new DateTime(2003,11,27)},
           new Employee() { Id = 3,FirstName = "3amr",LastName = "Alghazo",Position ="Manager", BirthDate = new DateTime(2004,12,3) },
           new Employee() { Id = 3,FirstName = "Salem",LastName = "Qudah",Position ="Hr", BirthDate = new DateTime(1997,5,27) },
           new Employee() { Id = 4,FirstName = "Obada",LastName = "Ananbeh",Email = "obadaananbeh5@gmail.com",Position ="Co-Owner", BirthDate = new DateTime(1999,6,4) }
