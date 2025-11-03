@@ -1,7 +1,9 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using HRMS2.Models;
+﻿using HRMS2.Db_Contexts;
 using HRMS2.Dtos.Employees;
+using HRMS2.Models;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Runtime.ExceptionServices;
 
 namespace HRMS2.Controllers
@@ -10,13 +12,23 @@ namespace HRMS2.Controllers
     [ApiController] // data annotation
     public class EmployeesController : ControllerBase // inherit perm to be controller
     {
-        public static List<Employee> employees = new List<Employee>()
+        //public static List<Employee> employees = new List<Employee>()
+        //{
+        //  new Employee() { Id = 1,FirstName = "Murad",LastName = "Frehat",Email = "mohammadfrehat95@gmail.com",Position ="Leader", BirthDate = new DateTime(2003,11,27)},
+        //  new Employee() { Id = 3,FirstName = "3amr",LastName = "Alghazo",Position ="Manager", BirthDate = new DateTime(2004,12,3) },
+        //  new Employee() { Id = 3,FirstName = "Salem",LastName = "Qudah",Position ="Hr", BirthDate = new DateTime(1997,5,27) },
+        //  new Employee() { Id = 4,FirstName = "Obada",LastName = "Ananbeh",Email = "obadaananbeh5@gmail.com",Position ="Co-Owner", BirthDate = new DateTime(1999,6,4) }
+        //};
+
+
+        //Dependency Injection --> Container in Program.cs
+        private readonly HRMSContext _dbContext;
+        public EmployeesController(HRMSContext dbContext)
         {
-          new Employee() { Id = 1,FirstName = "Murad",LastName = "Frehat",Email = "mohammadfrehat95@gmail.com",Position ="Leader", BirthDate = new DateTime(2003,11,27)},
-          new Employee() { Id = 3,FirstName = "3amr",LastName = "Alghazo",Position ="Manager", BirthDate = new DateTime(2004,12,3) },
-          new Employee() { Id = 3,FirstName = "Salem",LastName = "Qudah",Position ="Hr", BirthDate = new DateTime(1997,5,27) },
-          new Employee() { Id = 4,FirstName = "Obada",LastName = "Ananbeh",Email = "obadaananbeh5@gmail.com",Position ="Co-Owner", BirthDate = new DateTime(1999,6,4) }
-        };
+            _dbContext = dbContext; 
+        }
+
+        // name in .net for libaray is (nuget package)
 
         //CRUD Operations
         // C : Create --> post
@@ -28,7 +40,9 @@ namespace HRMS2.Controllers
         // u can't use complex data type with Get only if u use [FromQuery]
         public IActionResult GetByCiteria([FromQuery] SearchEmployeeDto employeeDto) // optional or nullable
         {
-            var result = from employee in employees
+            var result = from employee in _dbContext.Employees
+                         from Departments in _dbContext.Departments.Where(x => x.Id == employee.DepartmentId).DefaultIfEmpty() // left join bc defaultifempty
+                         from manager in _dbContext.Employees.Where(x => x.Id == employee.ManagerId).DefaultIfEmpty() // self join
                          where (employeeDto.Position == null || employee.Position.ToUpper().Contains(employeeDto.Position.ToUpper())) &&
                          (employeeDto.Name == null || employee.FirstName.ToUpper().Contains(employeeDto.Name.ToUpper()))
                          orderby employee.Id descending
@@ -38,7 +52,12 @@ namespace HRMS2.Controllers
                              Name = employee.FirstName + " " + employee.LastName,
                              Email = employee.Email,
                              Position = employee.Position,
-                             BirthDate = employee.BirthDate
+                             BirthDate = employee.BirthDate,
+                             DepartmentId = employee.DepartmentId,
+                             DepartmentName = Departments.Name,
+                             Salary = employee.Salary,
+                             ManagerId = employee.ManagerId,
+                             ManagerName = manager.FirstName
                          };
 
             return Ok(result);
@@ -58,13 +77,18 @@ namespace HRMS2.Controllers
                 return BadRequest("Id Value Is Invalid!");
             }
 
-            var result = employees.Select(x => new EmployeeDto
+            var result = _dbContext.Employees.Select(x => new EmployeeDto
             {
                 Id = x.Id,
                 Name = x.FirstName + " " + x.LastName,
                 Email = x.Email,
                 Position = x.Position,
-                BirthDate = x.BirthDate
+                BirthDate = x.BirthDate,
+                Salary = x.Salary,
+                ManagerId = x.ManagerId,
+                ManagerName = "",
+                DepartmentId = x.DepartmentId,
+                DepartmentName = ""
             }).FirstOrDefault(x => x.Id == id);
 
             if (result == null)
@@ -82,15 +106,18 @@ namespace HRMS2.Controllers
             // employees.Add(employeeDto) :D you can't add something in model from dto 
             var employee = new Employee()
             {
-                Id = (employees.LastOrDefault()?.Id ?? 0) + 1,
+                Id = 0, //(employees.LastOrDefault()?.Id ?? 0) + 1,
                 FirstName = employeeDto.FirstName,
                 LastName = employeeDto.LastName,
                 Email = employeeDto.Email,
                 BirthDate = (DateTime)employeeDto.BirthDate,
                 Position = employeeDto.Position,
-
+                Salary = employeeDto.Salary,
+                DepartmentId = employeeDto.DepartmentId,
+                ManagerId = employeeDto.ManagerId
             };
-            employees.Add(employee);
+            _dbContext.Employees.Add(employee);
+            _dbContext.SaveChanges(); // Commit: To Save Employee 
 
             return Ok();
         }
@@ -99,7 +126,7 @@ namespace HRMS2.Controllers
 
         public IActionResult Update([FromBody] SaveEmployeeDto employeeDto)
         {
-            var employee = employees.FirstOrDefault(x => x.Id == employeeDto.Id);
+            var employee = _dbContext.Employees.FirstOrDefault(x => x.Id == employeeDto.Id);
 
             if (employee == null)
             {
@@ -111,6 +138,10 @@ namespace HRMS2.Controllers
             employee.Email = employeeDto.Email;
             employee.BirthDate = (DateTime)employeeDto.BirthDate;
             employee.Position = employeeDto.Position;
+            employee.Salary = employeeDto.Salary;
+            employee.DepartmentId = employeeDto.DepartmentId;
+            employee.ManagerId = employeeDto.ManagerId;
+            _dbContext.SaveChanges();
 
             return Ok();
 
@@ -125,17 +156,18 @@ namespace HRMS2.Controllers
          }
          */
 
-        [HttpDelete("Delete")]
+        [HttpDelete("Delete/{id}")]
         public IActionResult Delete([FromQuery] long id)
         {
-            var employee = employees.FirstOrDefault(x => x.Id == id);
+            var employee = _dbContext.Employees.FirstOrDefault(x => x.Id == id);
 
             if (employee == null)
             {
                 return NotFound("Employee Does not exist!");
             }
 
-            employees.Remove(employee);
+            _dbContext.Employees.Remove(employee);
+            _dbContext.SaveChanges();
             return Ok();
         }
 
