@@ -25,7 +25,7 @@ namespace HRMS2.Controllers
         private readonly HRMSContext _dbContext;
         public EmployeesController(HRMSContext dbContext)
         {
-            _dbContext = dbContext; 
+            _dbContext = dbContext;
         }
 
         // name in .net for libaray is (nuget package)
@@ -43,15 +43,17 @@ namespace HRMS2.Controllers
             var result = from employee in _dbContext.Employees
                          from Departments in _dbContext.Departments.Where(x => x.Id == employee.DepartmentId).DefaultIfEmpty() // left join bc defaultifempty
                          from manager in _dbContext.Employees.Where(x => x.Id == employee.ManagerId).DefaultIfEmpty() // self join
-                         where (employeeDto.Position == null || employee.Position.ToUpper().Contains(employeeDto.Position.ToUpper())) &&
-                         (employeeDto.Name == null || employee.FirstName.ToUpper().Contains(employeeDto.Name.ToUpper()))
+                         from Lookup in _dbContext.Lookups.Where(x => x.Id == employee.PositionId).DefaultIfEmpty()
+                         where (employeeDto.PositionId == null || employee.PositionId == (employeeDto.PositionId) &&
+                         (employeeDto.Name == null || employee.FirstName.ToUpper().Contains(employeeDto.Name.ToUpper())))
                          orderby employee.Id descending
                          select new EmployeeDto
                          {
                              Id = employee.Id,
                              Name = employee.FirstName + " " + employee.LastName,
                              Email = employee.Email,
-                             Position = employee.Position,
+                             PositionId = employee.PositionId,
+                             PositionName = Lookup.Name,
                              BirthDate = employee.BirthDate,
                              DepartmentId = employee.DepartmentId,
                              DepartmentName = Departments.Name,
@@ -82,13 +84,14 @@ namespace HRMS2.Controllers
                 Id = x.Id,
                 Name = x.FirstName + " " + x.LastName,
                 Email = x.Email,
-                Position = x.Position,
+                PositionId = x.PositionId,
+                PositionName = x.lookup.Name,
                 BirthDate = x.BirthDate,
                 Salary = x.Salary,
                 ManagerId = x.ManagerId,
-                ManagerName = "",
+                ManagerName = x.Manager.FirstName,
                 DepartmentId = x.DepartmentId,
-                DepartmentName = ""
+                DepartmentName = x.Department.Name
             }).FirstOrDefault(x => x.Id == id);
 
             if (result == null)
@@ -111,7 +114,7 @@ namespace HRMS2.Controllers
                 LastName = employeeDto.LastName,
                 Email = employeeDto.Email,
                 BirthDate = (DateTime)employeeDto.BirthDate,
-                Position = employeeDto.Position,
+                PositionId = employeeDto.PositionId,
                 Salary = employeeDto.Salary,
                 DepartmentId = employeeDto.DepartmentId,
                 ManagerId = employeeDto.ManagerId
@@ -137,7 +140,7 @@ namespace HRMS2.Controllers
             employee.LastName = employeeDto.LastName;
             employee.Email = employeeDto.Email;
             employee.BirthDate = (DateTime)employeeDto.BirthDate;
-            employee.Position = employeeDto.Position;
+            employee.PositionId = employeeDto.PositionId;
             employee.Salary = employeeDto.Salary;
             employee.DepartmentId = employeeDto.DepartmentId;
             employee.ManagerId = employeeDto.ManagerId;

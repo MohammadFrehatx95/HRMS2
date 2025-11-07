@@ -54,13 +54,13 @@ namespace HRMS2.Controllers
             var result = _dbContext.Departments.Select(x => new DepartmentDto
             {
                 Id = x.Id,
-                Name = x.Name,  
+                Name = x.Name,
                 Description = x.Description,
                 FloorNumber = x.FloorNumber
             }).FirstOrDefault(x => x.Id == id);
 
 
-            if(result == null)
+            if (result == null)
             {
                 return NotFound($"Department with Id {id} not found.");
             }
@@ -91,13 +91,13 @@ namespace HRMS2.Controllers
         {
             var existingDepartment = _dbContext.Departments.FirstOrDefault(d => d.Id == DepartmentDto.Id);
 
-            if(existingDepartment == null)
+            if (existingDepartment == null)
             {
                 return NotFound("$The Department With Id {DepartmentDto.Id} Not Found!");
             }
 
             existingDepartment.Name = DepartmentDto.Name;
-            existingDepartment.Description = DepartmentDto.Description; 
+            existingDepartment.Description = DepartmentDto.Description;
             existingDepartment.FloorNumber = DepartmentDto.FloorNumber;
 
             _dbContext.SaveChanges();
@@ -106,7 +106,7 @@ namespace HRMS2.Controllers
 
         [HttpDelete("Delete/{id}")]
         public IActionResult Delete([FromQuery] long id)
-        { 
+        {
             var existingDepartment = _dbContext.Departments.FirstOrDefault(d => d.Id == id);
 
             if (existingDepartment == null)
@@ -114,8 +114,8 @@ namespace HRMS2.Controllers
                 return NotFound("$The Department With Id {DepartmentDto.Id} Not Found!");
             }
 
-           _dbContext.Departments.Remove(existingDepartment);
-           _dbContext.SaveChanges();
+            _dbContext.Departments.Remove(existingDepartment);
+            _dbContext.SaveChanges();
 
             return Ok();
 

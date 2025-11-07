@@ -4,6 +4,7 @@ using HRMS2.Db_Contexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HRMS2.Migrations
 {
     [DbContext(typeof(HRMSContext))]
-    partial class HRMSContextModelSnapshot : ModelSnapshot
+    [Migration("20251107150200_seed_database")]
+    partial class seed_database
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -56,7 +59,6 @@ namespace HRMS2.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
 
                     b.Property<DateTime?>("BirthDate")
-                        .HasMaxLength(50)
                         .HasColumnType("datetime2");
 
                     b.Property<long?>("DepartmentId")
@@ -79,22 +81,18 @@ namespace HRMS2.Migrations
                     b.Property<long?>("ManagerId")
                         .HasColumnType("bigint");
 
-                    b.Property<long>("PositionId")
+                    b.Property<long>("Position")
+                        .HasMaxLength(50)
                         .HasColumnType("bigint");
 
                     b.Property<decimal>("Salary")
                         .HasColumnType("decimal(18,2)");
-
-                    b.Property<long?>("lookupId")
-                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
                     b.HasIndex("DepartmentId");
 
                     b.HasIndex("ManagerId");
-
-                    b.HasIndex("lookupId");
 
                     b.ToTable("Employees");
                 });
@@ -190,15 +188,9 @@ namespace HRMS2.Migrations
                         .WithMany()
                         .HasForeignKey("ManagerId");
 
-                    b.HasOne("HRMS2.Models.Lookup", "lookup")
-                        .WithMany()
-                        .HasForeignKey("lookupId");
-
                     b.Navigation("Department");
 
                     b.Navigation("Manager");
-
-                    b.Navigation("lookup");
                 });
 #pragma warning restore 612, 618
         }
