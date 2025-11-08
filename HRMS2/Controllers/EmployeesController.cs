@@ -1,4 +1,4 @@
-﻿using HRMS2.Db_Contexts;
+﻿using HRMS.DbContexts;
 using HRMS2.Dtos.Employees;
 using HRMS2.Models;
 using Microsoft.AspNetCore.Http;
@@ -8,181 +8,216 @@ using System.Runtime.ExceptionServices;
 
 namespace HRMS2.Controllers
 {
-    [Route("api/[controller]")] // data annotation
-    [ApiController] // data annotation
-    public class EmployeesController : ControllerBase // inherit perm to be controller
+    [Route("api/[controller]")]// Data Annotation
+    [ApiController]// Data Annotation
+    public class EmployeesController : ControllerBase
     {
-        //public static List<Employee> employees = new List<Employee>()
-        //{
-        //  new Employee() { Id = 1,FirstName = "Murad",LastName = "Frehat",Email = "mohammadfrehat95@gmail.com",Position ="Leader", BirthDate = new DateTime(2003,11,27)},
-        //  new Employee() { Id = 3,FirstName = "3amr",LastName = "Alghazo",Position ="Manager", BirthDate = new DateTime(2004,12,3) },
-        //  new Employee() { Id = 3,FirstName = "Salem",LastName = "Qudah",Position ="Hr", BirthDate = new DateTime(1997,5,27) },
-        //  new Employee() { Id = 4,FirstName = "Obada",LastName = "Ananbeh",Email = "obadaananbeh5@gmail.com",Position ="Co-Owner", BirthDate = new DateTime(1999,6,4) }
-        //};
-
-
-        //Dependency Injection --> Container in Program.cs
+        // Depndency Injuction
         private readonly HRMSContext _dbContext;
         public EmployeesController(HRMSContext dbContext)
         {
             _dbContext = dbContext;
         }
 
-        // name in .net for libaray is (nuget package)
 
-        //CRUD Operations
-        // C : Create --> post
-        // R : Read   --> get
-        // U : Update --> put
-        // D : Delete --> Delete
 
-        [HttpGet("GetByCiteria")]
-        // u can't use complex data type with Get only if u use [FromQuery]
-        public IActionResult GetByCiteria([FromQuery] SearchEmployeeDto employeeDto) // optional or nullable
+        // Nuget Packeage
+
+        // CRUD Operations 
+        // C : Create
+        // R : Read
+        // U : Update
+        // D : Delete
+
+        // Read
+        [HttpGet("GetByCriteria")] // Data Annotation : Method -> Api Endpoint
+        public IActionResult GetByCriteria([FromQuery] SearchEmployeeDto employeeDto) // (?) --> Optional / Nullable
         {
-            var result = from employee in _dbContext.Employees
-                         from Departments in _dbContext.Departments.Where(x => x.Id == employee.DepartmentId).DefaultIfEmpty() // left join bc defaultifempty
-                         from manager in _dbContext.Employees.Where(x => x.Id == employee.ManagerId).DefaultIfEmpty() // self join
-                         from Lookup in _dbContext.Lookups.Where(x => x.Id == employee.PositionId).DefaultIfEmpty()
-                         where (employeeDto.PositionId == null || employee.PositionId == (employeeDto.PositionId) &&
-                         (employeeDto.Name == null || employee.FirstName.ToUpper().Contains(employeeDto.Name.ToUpper())))
-                         orderby employee.Id descending
-                         select new EmployeeDto
-                         {
-                             Id = employee.Id,
-                             Name = employee.FirstName + " " + employee.LastName,
-                             Email = employee.Email,
-                             PositionId = employee.PositionId,
-                             PositionName = Lookup.Name,
-                             BirthDate = employee.BirthDate,
-                             DepartmentId = employee.DepartmentId,
-                             DepartmentName = Departments.Name,
-                             Salary = employee.Salary,
-                             ManagerId = employee.ManagerId,
-                             ManagerName = manager.FirstName
-                         };
+            try
+            {
+                var result = from employee in _dbContext.Employees
+                             from department in _dbContext.Departments.Where(x => x.Id == employee.DepartmentId).DefaultIfEmpty() // Left Join
+                             from manager in _dbContext.Employees.Where(x => x.Id == employee.ManagerId).DefaultIfEmpty() // Left Join
+                             from lookup in _dbContext.Lookups.Where(x => x.Id == employee.PositionId)
+                             where
+                             (employeeDto.PositionId == null || employee.PositionId == employeeDto.PositionId) &&
+                             (employeeDto.Name == null || employee.FirstName.ToUpper().Contains(employeeDto.Name.ToUpper()))
+                             orderby employee.Id descending
+                             select new EmployeeDto
+                             {
+                                 Id = employee.Id,
+                                 Name = employee.FirstName + " " + employee.LastName,
+                                 PositionId = employee.PositionId,
+                                 PositionName = lookup.Name,
+                                 BirthDate = employee.BirthDate,
+                                 Email = employee.Email,
+                                 Salary = employee.Salary,
+                                 DepartmentId = employee.DepartmentId,
+                                 DepartmentName = department.Name,
+                                 ManagerId = employee.ManagerId,
+                                 ManagerName = manager.FirstName,
+                             };
 
-            return Ok(result);
+                return Ok(result);
+
+                //return Ok(new { Name = "Ahmad", Age = 26});// 200
+                //return NotFound("No Data Found");// 404
+                //return BadRequest("Data Missing"); // 400
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+
         }
 
-
-        [HttpGet("GetById/{id}")] // Route parameter --> part of url & u can use it when you have one parameter & the value required
+        [HttpGet("GetById/{id}")] // Route Parameter
         public IActionResult GetById(long id)
         {
-            //var result = employees.Where(x => x.Id == id); // return [{ }] array
-            //var result = employees.First(x => x.Id == id); // Invaild Exepction When enter id does not exist
-            //var result = employees.SingleOrDefault(x => x.Id == id); // Invaild Exepction When there are two id's same
-            //var result = employees.FirstOrDefault(x => x.Id == id); // return only one record (best option)
-
-            if (id <= 0)
+            try
             {
-                return BadRequest("Id Value Is Invalid!");
+                if (id == 0)
+                {
+                    return BadRequest("Id Value Is Invalid");
+                }
+                var result = _dbContext.Employees.Select(x => new EmployeeDto // Projection
+                {
+                    Id = x.Id,
+                    Name = x.FirstName + " " + x.LastName,
+                    PositionId = x.PositionId,
+                    PositionName = x.lookup.Name,
+                    BirthDate = x.BirthDate,
+                    Email = x.Email,
+                    Salary = x.Salary,
+                    DepartmentId = x.DepartmentId,
+                    DepartmentName = x.Department.Name,
+                    ManagerId = x.ManagerId,
+                    ManagerName = x.Manager.FirstName
+                }).FirstOrDefault(x => x.Id == id);
+
+
+                /*
+                 var result = _dbContext.Employees.Include(x => x.Lookup).Include(x => x.Manager).ThenInclude(x => x.Lookup) // Eager Loading
+                    .FirstOrDefault(x => x.Id == id); 
+                */
+
+
+                // Projection --> Select
+                // Eager Loading --> Include
+                // Lazy Loading --> ??
+
+                if (result == null)
+                {
+                    return NotFound("Employee Not Found");
+                }
+
+                return Ok(result);
             }
-
-            var result = _dbContext.Employees.Select(x => new EmployeeDto
+            catch (Exception ex)
             {
-                Id = x.Id,
-                Name = x.FirstName + " " + x.LastName,
-                Email = x.Email,
-                PositionId = x.PositionId,
-                PositionName = x.lookup.Name,
-                BirthDate = x.BirthDate,
-                Salary = x.Salary,
-                ManagerId = x.ManagerId,
-                ManagerName = x.Manager.FirstName,
-                DepartmentId = x.DepartmentId,
-                DepartmentName = x.Department.Name
-            }).FirstOrDefault(x => x.Id == id);
-
-            if (result == null)
-            {
-                return NotFound("Employee Not Found!");
+                return BadRequest(ex.Message);
             }
-
-            return Ok(result);
         }
 
-        [HttpPost("Add")]
-
+        [HttpPost("Add")] // Create
         public IActionResult Add([FromBody] SaveEmployeeDto employeeDto)
         {
-            // employees.Add(employeeDto) :D you can't add something in model from dto 
-            var employee = new Employee()
+            try
             {
-                Id = 0, //(employees.LastOrDefault()?.Id ?? 0) + 1,
-                FirstName = employeeDto.FirstName,
-                LastName = employeeDto.LastName,
-                Email = employeeDto.Email,
-                BirthDate = (DateTime)employeeDto.BirthDate,
-                PositionId = employeeDto.PositionId,
-                Salary = employeeDto.Salary,
-                DepartmentId = employeeDto.DepartmentId,
-                ManagerId = employeeDto.ManagerId
-            };
-            _dbContext.Employees.Add(employee);
-            _dbContext.SaveChanges(); // Commit: To Save Employee 
+                var employee = new Employee()
+                {
+                    Id = 0, //(employees.LastOrDefault()?.Id ?? 0) + 1,
+                    FirstName = employeeDto.FirstName,
+                    LastName = employeeDto.LastName,
+                    Email = employeeDto.Email,
+                    BirthDate = employeeDto.BirthDate,
+                    PositionId = employeeDto.PositionId,
+                    Salary = employeeDto.Salary,
+                    DepartmentId = employeeDto.DepartmentId,
+                    ManagerId = employeeDto.ManagerId
+                };
+                _dbContext.Employees.Add(employee);
+                _dbContext.SaveChanges(); // Commit
 
-            return Ok();
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+
         }
 
-        [HttpPut("Update")]
-
+        [HttpPut("Update")] // Update
         public IActionResult Update([FromBody] SaveEmployeeDto employeeDto)
         {
-            var employee = _dbContext.Employees.FirstOrDefault(x => x.Id == employeeDto.Id);
-
-            if (employee == null)
+            try
             {
-                return NotFound("Employee Does Not Exist!");
+                var employee = _dbContext.Employees.FirstOrDefault(x => x.Id == employeeDto.Id);
+
+
+                if (employee == null)
+                {
+                    return NotFound("Employee Does Not Exist");
+                }
+
+
+                employee.FirstName = employeeDto.FirstName;
+                employee.LastName = employeeDto.LastName;
+                employee.Email = employeeDto.Email;
+                employee.BirthDate = employeeDto.BirthDate;
+                employee.PositionId = employeeDto.PositionId;
+                employee.Salary = employeeDto.Salary;
+                employee.DepartmentId = employeeDto.DepartmentId;
+                employee.ManagerId = employeeDto.ManagerId;
+                _dbContext.SaveChanges();
+
+                return Ok();
             }
-
-            employee.FirstName = employeeDto.FirstName;
-            employee.LastName = employeeDto.LastName;
-            employee.Email = employeeDto.Email;
-            employee.BirthDate = (DateTime)employeeDto.BirthDate;
-            employee.PositionId = employeeDto.PositionId;
-            employee.Salary = employeeDto.Salary;
-            employee.DepartmentId = employeeDto.DepartmentId;
-            employee.ManagerId = employeeDto.ManagerId;
-            _dbContext.SaveChanges();
-
-            return Ok();
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
 
         }
 
-        /* [HttpGet("Test")]
-         public IActionResult Test()
-         {
-             var data = employees.LastOrDefault().Id + 1; // if no employees in the list it will Give you an Null Ref Execption
-
-             return Ok(data);
-         }
-         */
-
-        [HttpDelete("Delete/{id}")]
-        public IActionResult Delete([FromQuery] long id)
+        [HttpDelete("Delete/{id}")] // Delete
+        public IActionResult Delete(long id)
         {
-            var employee = _dbContext.Employees.FirstOrDefault(x => x.Id == id);
-
-            if (employee == null)
+            try
             {
-                return NotFound("Employee Does not exist!");
+                var employee = _dbContext.Employees.FirstOrDefault(x => x.Id == id);
+
+                if (employee == null)
+                {
+                    return NotFound("Employee Does Not Exist"); // 404
+                }
+
+                _dbContext.Employees.Remove(employee);
+                _dbContext.SaveChanges();
+                return Ok();
             }
 
-            _dbContext.Employees.Remove(employee);
-            _dbContext.SaveChanges();
-            return Ok();
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+
         }
-
-        // long, int, string, bool ,etc... --> simple data type // Query Parameter (By Default)
-        // Dtos, Model, Objects --> complex data type // Request Body (By Default)
-
-        // Http Get: Cannot Use Body Request [FromBody], We can only Use Query Parameters [FromQuery]
-        // Http Post/Put: Can Use Both Body Request [FromBody] & Query Parameter [FromQuery] but we will only use [FromBody]
-        // Http Delete: Can Use Both Body Request [FromBody] & Query Parameter [FromQuery] but we will only use [FromQuery]
-
-        // you cannot have more than one parameter of type --> [FromBody]
-        // you can have more than one parameter of type --> [FromQuery]
 
     }
+
+
+
+    // Simple Data Types --> string, int, double, long.... // Query Parameter (By Default) 
+    // Complix Data Types --> Objects, Dtos, Model... // Body Request (By Defualt)
+
+    // Http Get : Can Not Use Body Request [FromBody], We Can Only Use Query Parameters [FromQuery]
+    // Http Post/Put : Can Use Both Body Request [FromBody] And Query Parameter [FromQuery], But We Will Only Use [FromBody]
+    // Http Delete : Can Use Both Body Request [FromBody] And Query Parameter [FromQuery], But We Will Only Use [FromQuery]
+
+    // Method Cannot Use Multiple Parameters Of Type [FromBody]
+    // Method Can Use Multiple Parameters Of Type [FromQuery]
+
 }
+

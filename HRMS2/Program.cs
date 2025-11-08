@@ -1,4 +1,4 @@
-using HRMS2.Db_Contexts;
+using HRMS.DbContexts;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);

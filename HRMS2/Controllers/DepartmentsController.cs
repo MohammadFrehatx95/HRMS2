@@ -1,4 +1,4 @@
-﻿using HRMS2.Db_Contexts;
+﻿using HRMS.DbContexts;
 using HRMS2.Dtos.Departments;
 using HRMS2.Models;
 using Microsoft.AspNetCore.Http;
