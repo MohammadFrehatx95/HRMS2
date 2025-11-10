@@ -4,6 +4,7 @@ using HRMS.DbContexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HRMS2.Migrations
 {
     [DbContext(typeof(HRMSContext))]
-    partial class HRMSContextModelSnapshot : ModelSnapshot
+    [Migration("20251107151129_add_PositionId")]
+    partial class add_PositionId
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,42 +24,6 @@ namespace HRMS2.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
-
-            modelBuilder.Entity("HRMS.Models.User", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
-
-                    b.Property<string>("HashedPassword")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("IsAdmin")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Username")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Username")
-                        .IsUnique();
-
-                    b.ToTable("Users");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1L,
-                            HashedPassword = "$2a$11$FodwrXysOiJ9lFlf1PZGZOQZH1fvBzBivVnSewumv5QTqlDIXh1/e",
-                            IsAdmin = true,
-                            Username = "Admin"
-                        });
-                });
 
             modelBuilder.Entity("HRMS2.Models.Department", b =>
                 {
@@ -121,9 +88,6 @@ namespace HRMS2.Migrations
                     b.Property<decimal>("Salary")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<long>("UserId")
-                        .HasColumnType("bigint");
-
                     b.Property<long?>("lookupId")
                         .HasColumnType("bigint");
 
@@ -132,9 +96,6 @@ namespace HRMS2.Migrations
                     b.HasIndex("DepartmentId");
 
                     b.HasIndex("ManagerId");
-
-                    b.HasIndex("UserId")
-                        .IsUnique();
 
                     b.HasIndex("lookupId");
 
@@ -169,7 +130,7 @@ namespace HRMS2.Migrations
                             Id = 1L,
                             MajorCode = 0,
                             MinorCode = 0,
-                            Name = "Employee Positions"
+                            Name = "Employee Position"
                         },
                         new
                         {
@@ -197,7 +158,7 @@ namespace HRMS2.Migrations
                             Id = 5L,
                             MajorCode = 1,
                             MinorCode = 0,
-                            Name = "Department Types"
+                            Name = "Department Type"
                         },
                         new
                         {
@@ -232,12 +193,6 @@ namespace HRMS2.Migrations
                         .WithMany()
                         .HasForeignKey("ManagerId");
 
-                    b.HasOne("HRMS.Models.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("HRMS2.Models.Lookup", "lookup")
                         .WithMany()
                         .HasForeignKey("lookupId");
@@ -245,8 +200,6 @@ namespace HRMS2.Migrations
                     b.Navigation("Department");
 
                     b.Navigation("Manager");
-
-                    b.Navigation("User");
 
                     b.Navigation("lookup");
                 });

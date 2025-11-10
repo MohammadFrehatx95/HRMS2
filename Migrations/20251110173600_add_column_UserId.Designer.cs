@@ -4,16 +4,19 @@ using HRMS.DbContexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace HRMS2.Migrations
+namespace HRMS.Migrations
 {
     [DbContext(typeof(HRMSContext))]
-    partial class HRMSContextModelSnapshot : ModelSnapshot
+    [Migration("20251110173600_add_column_UserId")]
+    partial class add_column_UserId
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

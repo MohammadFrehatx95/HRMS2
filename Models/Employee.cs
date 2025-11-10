@@ -30,7 +30,7 @@ namespace HRMS2.Models
         public Employee? Manager { get; set; } // Navigation Property for self-referencing
 
         [ForeignKey("Lookup")]
-        public long PositionId { get; set; }
+        public long PositionId {  get; set; }
         public Lookup? lookup { get; set; }
 
         [ForeignKey("User")]
