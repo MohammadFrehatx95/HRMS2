@@ -1,6 +1,7 @@
 ﻿using HRMS.DbContexts;
 using HRMS2.Dtos.Employees;
 using HRMS2.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -8,6 +9,7 @@ using System.Runtime.ExceptionServices;
 
 namespace HRMS2.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]// Data Annotation
     [ApiController]// Data Annotation
     public class EmployeesController : ControllerBase
@@ -18,8 +20,6 @@ namespace HRMS2.Controllers
         {
             _dbContext = dbContext;
         }
-
-
 
         // Nuget Packeage
 

@@ -82,7 +82,7 @@ namespace HRMS2.Controllers
             var tokenSettings = new JwtSecurityToken(
                   claims: claims, // User Info
                   signingCredentials: creds, // Encryption Settings | Secret Key
-                  expires: DateTime.Now.AddDays(1) // When Does The Toke Expire
+                  expires: DateTime.Now.AddDays(1) // When Does The Token Expire
                 );
 
             var tokenHandler = new JwtSecurityTokenHandler();
