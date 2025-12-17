@@ -1,6 +1,7 @@
 ﻿using HRMS.Models;
 using HRMS2.Models;
 using Microsoft.EntityFrameworkCore;
+using System.Linq;
 
 namespace HRMS.DbContexts
 {

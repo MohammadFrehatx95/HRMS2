@@ -3,12 +3,11 @@ using HRMS.Models;
 using HRMS2.Dtos.Auth;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using Microsoft.EntityFrameworkCore;
-
 
 namespace HRMS2.Controllers
 {
@@ -82,7 +81,7 @@ namespace HRMS2.Controllers
             var tokenSettings = new JwtSecurityToken(
                   claims: claims, // User Info
                   signingCredentials: creds, // Encryption Settings | Secret Key
-                  expires: DateTime.Now.AddDays(1) // When Does The Token Expire
+                  expires: DateTime.Now.AddDays(1) // When Does The Toke Expire
                 );
 
             var tokenHandler = new JwtSecurityTokenHandler();

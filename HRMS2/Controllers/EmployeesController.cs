@@ -1,17 +1,13 @@
 ﻿using HRMS.DbContexts;
-using HRMS.Models;
 using HRMS2.Dtos.Employees;
 using HRMS2.Models;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Runtime.ExceptionServices;
-using System.Security.Claims;
 
 namespace HRMS2.Controllers
 {
-    [Authorize]
     [Route("api/[controller]")]// Data Annotation
     [ApiController]// Data Annotation
     public class EmployeesController : ControllerBase
@@ -22,6 +18,8 @@ namespace HRMS2.Controllers
         {
             _dbContext = dbContext;
         }
+
+
 
         // Nuget Packeage
 
@@ -35,10 +33,6 @@ namespace HRMS2.Controllers
         [HttpGet("GetByCriteria")] // Data Annotation : Method -> Api Endpoint
         public IActionResult GetByCriteria([FromQuery] SearchEmployeeDto employeeDto) // (?) --> Optional / Nullable
         {
-            // From Token
-            var role = User.FindFirst(ClaimTypes.Role)?.Value;
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            
             try
             {
                 var result = from employee in _dbContext.Employees
@@ -62,14 +56,7 @@ namespace HRMS2.Controllers
                                  DepartmentName = department.Name,
                                  ManagerId = employee.ManagerId,
                                  ManagerName = manager.FirstName,
-                                 UserId = employee.UserId
                              };
-
-                if(role?.ToUpper() != "Admin" && role?.ToUpper() != "HR")
-                {
-                   result = result.Where(x => x.UserId == long.Parse(userId));
-                }
-
 
                 return Ok(result);
 
@@ -87,10 +74,6 @@ namespace HRMS2.Controllers
         [HttpGet("GetById/{id}")] // Route Parameter
         public IActionResult GetById(long id)
         {
-            // From Token
-            var role = User.FindFirst(ClaimTypes.Role)?.Value;
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
             try
             {
                 if (id == 0)
@@ -109,17 +92,8 @@ namespace HRMS2.Controllers
                     DepartmentId = x.DepartmentId,
                     DepartmentName = x.Department.Name,
                     ManagerId = x.ManagerId,
-                    ManagerName = x.Manager.FirstName,
-                    UserId = x.UserId
+                    ManagerName = x.Manager.FirstName
                 }).FirstOrDefault(x => x.Id == id);
-
-                if (role?.ToUpper() != "Admin" && role?.ToUpper() != "HR")
-                {
-                   if(result.UserId != long.Parse(userId))
-                   {
-                        return Forbid("You Are Not Authorized To Access This Employee Data"); // 403
-                   }
-                }
 
 
                 /*
@@ -145,27 +119,9 @@ namespace HRMS2.Controllers
             }
         }
 
-        [Authorize(Roles = "HR,Admin")]
         [HttpPost("Add")] // Create
         public IActionResult Add([FromBody] SaveEmployeeDto employeeDto)
         {
-            var user = new User()
-            {
-                Id = 0,
-                Username = $"{employeeDto.FirstName}_{employeeDto.LastName}_HRMS",
-                HashedPassword = BCrypt.Net.BCrypt.HashPassword($"{employeeDto.FirstName}@123"),
-                IsAdmin = false
-            };
-
-            var IsUsernameExist = _dbContext.Users.Any(x => x.Username.ToUpper() == user.Username.ToUpper());
-            
-            if (IsUsernameExist)
-            {
-                return BadRequest("Username Already Exists, Please Choose Another one");
-            }
-
-            _dbContext.Users.Add(user);
-
             try
             {
                 var employee = new Employee()
@@ -178,9 +134,7 @@ namespace HRMS2.Controllers
                     PositionId = employeeDto.PositionId,
                     Salary = employeeDto.Salary,
                     DepartmentId = employeeDto.DepartmentId,
-                    ManagerId = employeeDto.ManagerId,
-                    //UserId = user.Id
-                    User = user // EF understand (Navigation Prop) is better than save changes two times.
+                    ManagerId = employeeDto.ManagerId
                 };
                 _dbContext.Employees.Add(employee);
                 _dbContext.SaveChanges(); // Commit
@@ -194,7 +148,6 @@ namespace HRMS2.Controllers
 
         }
 
-        [Authorize(Roles = "HR,Admin")]
         [HttpPut("Update")] // Update
         public IActionResult Update([FromBody] SaveEmployeeDto employeeDto)
         {
@@ -228,7 +181,6 @@ namespace HRMS2.Controllers
 
         }
 
-        [Authorize(Roles = "HR,Admin")]
         [HttpDelete("Delete/{id}")] // Delete
         public IActionResult Delete(long id)
         {
@@ -254,9 +206,6 @@ namespace HRMS2.Controllers
         }
 
     }
-
-
-
     // Simple Data Types --> string, int, double, long.... // Query Parameter (By Default) 
     // Complix Data Types --> Objects, Dtos, Model... // Body Request (By Defualt)
 
@@ -268,4 +217,3 @@ namespace HRMS2.Controllers
     // Method Can Use Multiple Parameters Of Type [FromQuery]
 
 }
-
