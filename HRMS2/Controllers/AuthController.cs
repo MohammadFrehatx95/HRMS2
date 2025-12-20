@@ -39,7 +39,7 @@ namespace HRMS2.Controllers
                 //if (loginDto.Password == user.HashedPassword)
                 if (!BCrypt.Net.BCrypt.Verify(loginDto.Password, user.HashedPassword))
                 {
-                    return BadRequest("Invalid Username Or Password");
+                    return BadRequest("Invalid Username Or Password"); 
                 }
 
                 var token = GenerateJwtToken(user);

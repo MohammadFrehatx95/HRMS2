@@ -1,0 +1,43 @@
+<!-- <div class="welcome">
+  Title : {{title}}
+  
+ </div>
+ <div >
+  arr : {{arr}}
+ </div>   -->
+
+<!-- What is Directives : the attribute that given to the element to control how it show in screen 
+ you must know what is Structural Directives: NgFor,NgIf,NgSwitch & Attribute Directives: NgClass, NgStyle 
+ 
+ CTRL K S -- Save all -- -->
+
+<h3> Before Angular 17</h3>
+<div *ngFor="let student of students; index as i">
+  <span style="margin-right: 5px">{{i + 1}}.</span>
+  <span style="margin-right: 5px" [ngClass]="{'passed' : student.mark >= 50, 'failed' : student.mark < 50}">
+    {{student.name}} </span>
+  <span style="margin-right: 5px" [ngStyle]="{'color' : student.mark >= 50 ? 'green' : 'red'}"> {{student.mark}}%
+  </span>
+  <span *ngIf="student.mark >= 50"> Passed </span>
+  <span *ngIf="student.mark < 50"> Failed </span>
+</div>
+
+<!-- in Angular 17+ They not Consider to Directives but they do same tasks
+ Template Syntax 
+ Control Flow Syntax 
+ They Dont Have a Generic Name.
+ -->
+
+<h3> After Angular 17</h3>
+@for(student of students; track student.id; let i = $index){
+<div appRandomColor>
+  <span style="margin-right: 5px">{{i + 1}}.</span>
+  <span style="margin-right: 5px" [class]=" student.mark >= 50 ? 'passed' : 'failed'"> {{student.name}} </span>
+  <span style="margin-right: 5px" [style.color]=" student.mark >= 50 ? 'green' : 'red'"> {{student.mark}}% </span>
+  @if(student.mark >= 50){
+  <span> Passed </span>
+  }
+  @else { <span> Failed </span>
+  }
+</div>
+}

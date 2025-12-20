@@ -1,0 +1,14 @@
+.welcome{
+    font-size: 20px;
+    font-weight: 600;
+}
+
+.passed{
+    font-weight: 600;
+    color: green;
+}
+
+.failed{
+    font-weight: 500;
+    color: red;
+}
