@@ -11,7 +11,7 @@
  
  CTRL K S -- Save all -- -->
 
-<h3> Before Angular 17</h3>
+<!-- <h3> Before Angular 17</h3>
 <div *ngFor="let student of students; index as i">
   <span style="margin-right: 5px">{{i + 1}}.</span>
   <span style="margin-right: 5px" [ngClass]="{'passed' : student.mark >= 50, 'failed' : student.mark < 50}">
@@ -20,7 +20,7 @@
   </span>
   <span *ngIf="student.mark >= 50"> Passed </span>
   <span *ngIf="student.mark < 50"> Failed </span>
-</div>
+</div> -->
 
 <!-- in Angular 17+ They not Consider to Directives but they do same tasks
  Template Syntax 
@@ -28,7 +28,7 @@
  They Dont Have a Generic Name.
  -->
 
-<h3> After Angular 17</h3>
+<!-- <h3> After Angular 17</h3>
 @for(student of students; track student.id; let i = $index){
 <div appRandomColor>
   <span style="margin-right: 5px">{{i + 1}}.</span>
@@ -40,4 +40,185 @@
   @else { <span> Failed </span>
   }
 </div>
-}
+} -->
+
+<!-- Data Binding : linking data between TS with Html User inferface
+ Interpolation : { { } }
+ Property Binding : [src]="images[0]"
+
+ one way Binding is: 1. input []  TS -> HTML
+ 2. output ()  HTML Event -> to TS
+-->
+<!-- <div style="margin: 40px;">
+  <img width="50%" height="50%" id="image" [src]="images[currentIndex]" alt="random-image">
+
+  <div>
+    <button type="button" id="previous" [disabled]="currentIndex === 0" (click)="previousImage()">Previous</button>
+    <button type="button" id="next" [disabled]="currentIndex === images.length - 1 " (click)="nextImage()">Next</button>
+  </div>
+</div> -->
+
+<!-- ngModel 
+   Two Way Data Binding : 
+  input + output & the ngModel is TwoWay~DB
+  -->
+<!-- <div style="margin : 40px">
+
+  <input type="text" [(ngModel)]="name">
+  <input type="number" [(ngModel)]="age">
+
+</div> -->
+
+<!-- <form [formGroup]="infoForm">
+  <input type="text" formControlName="name">
+  <input type="number" formControlName="age">
+</form>
+
+ <div class="welcome">
+{{infoForm.value.name}}
+</div>
+
+<div class="welcome">
+{{infoForm.value.age}}
+</div>  -->
+
+<div class="header">
+  <h2>Select And Submit To Join One Of Our Courses</h2>
+  <div class="content">
+    <div class="account">
+      <span class="email">q.irshaid<span>&#64;</span>gmail.com</span>
+      <span class="switch-account">
+        <a href="https://www.google.com/account/about/?hl=en-US" target="_blank">Switch Account</a>
+      </span>
+      <span class="cloud-icon">
+        <i class="fa-solid fa-cloud-arrow-up"></i>
+      </span>
+    </div>
+    <p class="description" id="description">
+      The name, email address and photo associated with your
+      Google Account will be recorded when you upload files and
+      submit this form
+    </p>
+    <p class="warning">
+      * Indecates required question
+    </p>
+  </div>
+</div>
+
+<form [formGroup]="form">
+  <div class="question">
+    <div class="title">
+      <label for="email">
+        Email
+        <span class="required-icon">*</span>
+      </label>
+    </div>
+    <div class="input-field">
+      <input id="email" type="email" formControlName="email" placeholder="Your Email Address"
+        [class.red-border]="form.get('email')?.invalid && form.get('email')?.touched">
+      @if(form.get('email')?.invalid && form.get('email')?.touched){
+      @if(form.get('email')?.errors?.['required']){
+      <div class="invalid-message">* Email is Required </div>
+      }
+      @else if(form.get('email')?.errors?.['email']){
+      <div class="invalid-message">* Invalid Email </div>
+      }
+      }
+    </div>
+  </div>
+  <div class="question">
+    <div class="title">
+      <label for="name">
+        Name
+        <span class="required-icon">*</span>
+      </label>
+    </div>
+    <div class="input-field">
+      <input id="name" type="text" formControlName="name" placeholder="Your Full Name"
+        [class.red-border]="form.get('name')?.invalid && form.get('name')?.touched">
+      @if(form.get('name')?.invalid && form.get('name')?.touched){
+      @if(form.get('name')?.errors?.['required']){
+      <div class="invalid-message">* Name is Required </div>
+      }
+      }
+
+    </div>
+  </div>
+  <div class="question">
+    <div class="title">
+      <label for="phone">
+        Phone Number
+        <span class="required-icon">*</span>
+      </label>
+    </div>
+    <div class="input-field">
+      <input id="phone" type="text" formControlName="phone" placeholder="Your Phone Number"
+        [class.red-border]="form.get('phone')?.invalid && form.get('phone')?.touched">
+      @if(form.get('phone')?.invalid && form.get('phone')?.touched){
+      @if(form.get('phone')?.errors?.['required']){
+      <div class="invalid-message">* Phone Number is Required </div>
+      }
+      @else if(form.get('phone')?.errors?.['minlength'] || form.get('phone')?.errors?.['maxlength'] ){
+      <div class="invalid-message">* Phone Number must be between 9 and 10 digits </div>
+      }
+      }
+    </div>
+  </div>
+  <div class="question">
+    <div class="title">
+      <label for="age">
+        Age
+      </label>
+    </div>
+    <div class="input-field">
+      <input id="age" type="number" min="18" max="45" formControlName="age" placeholder="Your Age">
+    </div>
+  </div>
+  <div class="question">
+    <div class="title">
+      <label for="course">
+        Course
+        <span class="required-icon">*</span>
+      </label>
+    </div>
+    <div class="input-field">
+      <select id="course" formControlName="course">
+        @for(course of courseOptions; track course){
+        <option [value]="course.id">{{course.name}}</option>
+        }
+      </select>
+    </div>
+  </div>
+  <div class="actions">
+    <button type="button" class="action-btn submit-btn" [disabled]="!form.valid" [class.disabled-button]="form.invalid"
+      (click)="submit()">Submit</button>
+    <button type="button" class="action-btn reset-btn" (click)="formReset()">Clear Form</button>
+  </div>
+</form>
+
+<div class="footer">
+  <p class="copy-right">
+    This form was created inside Princess Sumaya University for Technology. Does this form look suspicious?
+    <a href="">Report</a>
+  </p>
+  <p class="logo">
+    Google Forms
+  </p>
+
+  <p style="font-size: 1.5rem;"> 
+    price : {{price | currency :'USD'}} <!-- Number,Currency pipe for formatting -->
+  </p>
+
+   <p style="font-size: 1.5rem;"> 
+    date : {{date | date : 'short'}} <!-- Date pipe for formatting -->
+  </p>
+
+  <p style="font-size: 1.5rem;"> 
+    Title : {{title | uppercase}} <!-- uppercase pipe for formatting -->
+  </p>
+
+   <p style="font-size: 1.5rem;"> 
+    Title : {{'Angular' | reverse}} <!-- uppercase pipe for formatting -->
+  </p>
+</div>
+
