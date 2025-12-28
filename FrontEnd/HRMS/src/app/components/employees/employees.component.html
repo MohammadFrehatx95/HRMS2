@@ -10,7 +10,7 @@
       <div class="row mb-2"> <!-- 12 cols -->
         <div class="col-lg-4 col-md-4 col-sm-12">
           <label for="employeeName" class="form-label">Employee Name</label>
-          <input type="text" class="form-control" id="employeeName"
+          <input type="text" class="form-control" id="employeeName" 
             placeholder="Employee Name">
         </div>
         <div class="col-lg-4 col-md-4 col-sm-12">
@@ -36,7 +36,8 @@
   <div class="card mt-2">
     <div class="card-header table-header">
       <div> <h5>Employees</h5> </div>
-      <div> <button type="button" class="btn btn-outline-secondary">
+      <div> <button type="button" class="btn btn-outline-secondary"
+          data-bs-toggle="modal" data-bs-target="#savedEmployeeModal">
           <i class="bi bi-person-add"></i>
           Add Employee
         </button>
@@ -47,33 +48,116 @@
       <table class="table table-striped">
         <thead>
           <tr>
-          @for(col of employeesTableColumns; track col)
-          {
-             <th>{{col}}</th>
-          }
+            @for(col of employeesTableColumns; track col)
+            {
+            <th>{{col}}</th>
+            }
           </tr>
         </thead>
         <tbody>
+          @for(emp of employees | paginate: paginationConfig; track emp.id; let i = $index)
+          {
           <tr>
-            <th scope="row">1</th>
-            <td>Mark</td>
-            <td>Otto</td>
-            <td>mdo</td>
+            <td>{{i + 1}}</td>
+            <td>{{emp.name}}</td>
+            <td>{{emp.positionName}}</td>
+            <td>{{emp.birthdate | date: 'dd/mm/yyyy'}}</td>
+            <td>
+              @if (emp.status) {
+              <span class="badge rounded-pill text-bg-success">Active</span>
+              }
+              @else{
+              <span class="badge rounded-pill text-bg-danger">Inactive</span>
+              }
+            </td>
+            <td>{{emp.email}}</td>
+            <td>{{emp.salary | currency : 'USD'}}</td>
+            <td>{{emp.departmentName}}</td>
+            <td>{{emp.managerName}}</td>
           </tr>
-          <tr>
-            <th scope="row">2</th>
-            <td>Jacob</td>
-            <td>Thornton</td>
-            <td>fat</td>
-          </tr>
-          <tr>
-            <th scope="row">3</th>
-            <td>John</td>
-            <td>Doe</td>
-            <td>social</td>
-          </tr>
+          }
+
         </tbody>
       </table>
+      <pagination-controls (pageChange)="changePage($event)"></pagination-controls>
     </div>
   </div>
 </div>
+
+<div class="modal modal-lg fade" id="savedEmployeeModal" tabindex="-1"
+  aria-labelledby="savedEmployeeModal" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="savedEmployeeModal">Save Employee</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"
+          aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form [formGroup]="employeeForm">
+          <div class="row align-end">
+            <div class="col-lg-4 col-md-4 col-sm-12 mb-2">
+              <label for="name" class="form-label">Name</label>
+              <input type="text" class="form-control" id="name" formControlName="name" [class.invalid-form]="employeeForm.get('name')?.invalid && employeeForm.get('name')?.touched"
+                placeholder="Employee Name">
+            </div>
+            <div class="col-lg-4 col-md-4 col-sm-12 mb-2">
+              <label for="birthdate" class="form-label">birthDate</label>
+              <input type="date" class="form-control" id="birthdate" formControlName="birthdate"
+                placeholder="birthdate">
+            </div>
+            <div class="col-lg-4 col-md-4 col-sm-12 mb-2">
+              <label for="email" class="form-label">Email</label>
+              <input type="email" class="form-control" id="email" formControlName="email"
+                placeholder="Email">
+            </div>
+            <div class="col-lg-4 col-md-4 col-sm-12 mb-2">
+              <label for="salary" class="form-label">Salary</label>
+              <input type="number" class="form-control" id="salary" formControlName="salary" [class.invalid-form]="employeeForm.get('salary')?.invalid && employeeForm.get('salary')?.touched"
+                placeholder="Salary">
+            </div>
+            <div class="col-lg-4 col-md-4 col-sm-12 mb-2">
+              <label for="departments" class="form-label">Departments</label>
+              <select class="form-select" id="department" formControlName="departmentId" [class.invalid-form]="employeeForm.get('departmentId')?.invalid && employeeForm.get('departmentId')?.touched">
+                @for(item of departments; track item.id)
+                {
+                <option [value]="item.id">{{item.name}}</option>
+                }
+              </select>
+            </div>
+            <div class="col-lg-4 col-md-4 col-sm-12">
+              <label for="position" class="form-label">Position</label>
+              <select class="form-select" id="position" formControlName="positionId" [class.invalid-form]="employeeForm.get('positionId')?.invalid && employeeForm.get('positionId')?.touched">
+                @for(item of positions; track item.id)
+                {
+                <option [value]="item.id">{{item.name}}</option>
+                }
+              </select>
+            </div>
+            <div class="col-lg-4 col-md-4 col-sm-12">
+              <label for="manager" class="form-label">Manager</label>
+              <select class="form-select" id="manager" formControlName="managerId"> 
+                @for(item of managers; track item.id)
+                {
+                <option [value]="item.id">{{item.name}}</option>
+                }
+              </select>
+            </div>
+            <div class="col-lg-4 col-md-4 col-sm-12">
+              <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" role="switch" formControlName="status"
+                  id="status" checked>
+                <label class="form-check-label"
+                  for="status">Status</label>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary"
+          data-bs-dismiss="modal" id="closeDialog" #closeDialog>Close</button>
+        <button type="button" class="btn btn-primary" [disabled]="this.employeeForm?.invalid" (click)="saveEmployee()">Save changes</button>
+      </div>
+    </div>
+  </div>
